@@ -12,16 +12,14 @@ const SignUp = () => {
     gender: "",
   });
 
-  console.log("BRUH")
-
-  //const {loading, signup} = useSignup();
+  const {loading, signup} = useSignup();
   const handleCheckBoxChange = (value: "male" | "female") => {
 	setInputs({...inputs, gender: value})
   }
 
   const handleSubmit = (e: React.FormEvent) => {
 	e.preventDefault();
-	//signup(inputs)
+	signup(inputs)
   }
 
   return (
@@ -105,8 +103,8 @@ const SignUp = () => {
           </Link>
 
           <div>
-            <button className="btn btn-block btn-sm mt-2 border border-slate-700" disabled={false}>
-              {/* {loading ? "Loading..." : "Sign Up"} */}
+            <button className="btn btn-block btn-sm mt-2 border border-slate-700" disabled={loading}>
+              {loading ? "Loading..." : "Sign Up"}
             </button>
           </div>
         </form>

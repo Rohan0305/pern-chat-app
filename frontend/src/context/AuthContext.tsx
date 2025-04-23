@@ -7,6 +7,7 @@ import {
   useEffect,
   useContext,
 } from "react";
+import toast from "react-hot-toast";
 
 type AuthUserType = {
   id: string;
@@ -47,8 +48,9 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
           throw new Error(data.message)
         }
         setAuthUser(data);
-      }catch(error) {
-        console.error(error);
+      }catch(error: any) {
+        console.error(error.message);
+        toast.error(error.message);
       }finally{
         setIsLoading(false);
       }
