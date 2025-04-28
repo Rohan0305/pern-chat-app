@@ -3,11 +3,11 @@ import { useAuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 const useLogout = () => {
-  const [loading, isLoading] = useState(false);
+  const [loading, setIsLoading] = useState(false);
   const { setAuthUser } = useAuthContext();
 
   const logout = async () => {
-    isLoading(true);
+    setIsLoading(true);
     try {
       const res = await fetch("/api/auth/logout", {
         method: "POST",
@@ -22,7 +22,7 @@ const useLogout = () => {
       console.error(error.message);
       toast.error(error.message);
     } finally {
-        isLoading(false)
+        setIsLoading(false)
     }
   };
 
