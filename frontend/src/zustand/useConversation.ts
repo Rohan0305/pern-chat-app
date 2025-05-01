@@ -1,12 +1,5 @@
 import { create } from 'zustand';
 
-type MessageType = {
-    id: string;
-    body: string;
-    senderId: string;
-
-}
-
 interface ConversationState {
     selectedConversation: ConversationType | null;
     messages: MessageType[];
