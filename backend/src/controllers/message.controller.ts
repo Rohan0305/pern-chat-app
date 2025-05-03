@@ -66,9 +66,20 @@ export const getMessages = async (req: Request, res: Response) => {
           hasEvery: [senderId, receiverId],
         },
       },
+      select: {
+        messages: {
+          select: {
+            id: true,
+            body: true,
+            senderId: true,
+            createdAt: true,
+          },
+        },
+      },
     });
-
-    res.status(200).json(messages);
+    
+    console.log(messages)
+    res.status(200).json(messages?.messages ?? []);
   } catch (error: any) {
     console.log("Error in getMessage controller", error.message);
     res.status(500).json({ error: "Internal server error" });

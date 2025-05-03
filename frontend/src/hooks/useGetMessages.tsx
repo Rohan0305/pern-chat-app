@@ -17,6 +17,7 @@ export const useGetMessages = () => {
         if (!res.ok) {
             throw new Error(data.error || "An error occurred");
         }
+        if (!data) return;
         setMessages(data);
       } catch (error: any) {
         toast.error(error.message || "Failed to load messages");
