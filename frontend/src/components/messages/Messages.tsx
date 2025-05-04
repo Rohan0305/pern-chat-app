@@ -4,7 +4,6 @@ import Message from "./Message";
 
 const Messages = () => {
 	const {loading, messages} = useGetMessages();
-	console.log("MESSAGES", messages)
 	return (
 		<div className='px-4 flex-1 overflow-auto'>
 			{loading && [...Array(3)].map((_, idx) => <MessageSkeleton key={idx} />)}
