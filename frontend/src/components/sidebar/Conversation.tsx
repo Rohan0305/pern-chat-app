@@ -6,9 +6,6 @@ const Conversation = ({ conversation }: { conversation: ConversationType }) => {
   const isSelected = selectedConversation?.id === conversation.id;
 
   const {onlineUsers} = useSocketContext();
-
-  console.log(onlineUsers)
-
   const isOnline = onlineUsers.includes(conversation.id);
 
   return (
