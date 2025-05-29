@@ -1,10 +1,9 @@
-import { Search } from "lucide-react";
 import { useState } from "react";
 import useConversation from "../../zustand/useConversation";
 import useGetConversations from "../../hooks/useGetConversations";
 import toast from "react-hot-toast";
 
-const SearchInput = () => {
+const NewFriendSearch = () => {
 	const [search, setSearch] = useState("");
 	const { setSelectedConversation } = useConversation();
 	const { conversations } = useGetConversations();
@@ -35,10 +34,8 @@ const SearchInput = () => {
 				value={search}
 				onChange={(e) => setSearch(e.target.value)}
 			/>
-			<button type='submit' className='btn md:btn-md btn-sm btn-circle bg-sky-500 text-white  '>
-				<Search className='w-4 h-4 md:w-6 md:h-6 outline-none' />
-			</button>
+			<button className="bg-green-400 h-10 w-24 px-4 py-2 rounded flex text-white text-center text-sm items-center justify-center">Add Friend</button>
 		</form>
 	);
 };
-export default SearchInput;
+export default NewFriendSearch;

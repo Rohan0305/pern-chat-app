@@ -96,10 +96,21 @@ export const getUsersForSidebar = async (req: Request, res: Response)=> {
   try {
     const authUserId = req.user.id;
 
+    const friendShips = await prisma.friendShip.findMany({
+      where: {
+        userId: authUserId,
+      },
+      select: {
+        friendId: true,
+      }
+    });
+
+    const friendIds = friendShips.map((f) => f.friendId);
+
     const users = await prisma.user.findMany({
       where: {
         id: {
-          not: authUserId,
+          in: friendIds,
         },
       },
       select: {

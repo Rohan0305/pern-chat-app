@@ -24,8 +24,45 @@ model User{
   updatedAt DateTime @updatedAt
   conversationsIds String[]
 
-  conversations Conversation[] 
+  conversations Conversation[]
   messages Message[]
+ 
+  friendships FriendShip[] @relation("UserFriendships") 
+  friendOf FriendShip[] @relation("UserFriends") 
+
+  friendRequestsSent FriendRequest[] @relation("SentRequests")
+  friendRequestsReceived FriendRequest[] @relation("ReceivedRequests")
+}
+
+model FriendShip {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation("UserFriendships", fields: [userId], references: [id])
+
+  friendId String
+  friend User @relation("UserFriends", fields: [friendId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, friendId])
+}
+
+
+model FriendRequest {
+  id String @id @default(cuid())
+
+  sender User @relation("SentRequests", fields: [senderId], references: [id])
+  senderId String
+
+  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  receiverId String
+
+  createdAt DateTime @default(now())
+
+  status FriendRequestStatus @default(PENDING) // track if accepted, rejected, pending
+
+  @@unique([senderId, receiverId])
 }
 
 model Conversation {
@@ -59,3 +96,8 @@ enum Gender {
   female
 }
 
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
