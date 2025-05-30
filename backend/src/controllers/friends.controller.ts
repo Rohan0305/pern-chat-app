@@ -82,10 +82,40 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
 
 export const acceptFriendRequest = async (req: Request, res: Response) => {
   try {
-    
+    const { id: friendId } = req.params;
+    const userId = req.user.id;
+
+    await prisma.$transaction([
+      prisma.friendShip.create({
+        data: {
+          userId,
+          friendId,
+        },
+      }),
+      
+      prisma.friendShip.create({
+        data: {
+          userId: friendId,
+          friendId: userId,
+        },
+      }),
+
+      prisma.friendRequest.update({
+        where: {
+          senderId_receiverId: {
+            senderId: friendId,
+            receiverId: userId,
+          },
+        },
+        data: {
+          status: "ACCEPTED",
+        },
+      }),
+    ]);
+
+    res.status(200).json({ message: "Friend request accepted." });
   } catch (error: any) {
-    console.log("Error in friends controller", error.message);
+    console.error("Error in acceptFriendRequest:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
-    return;
   }
 };

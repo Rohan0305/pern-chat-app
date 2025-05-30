@@ -15,7 +15,7 @@ app.use(express.json()); //for parsing application/json
 
 app.use("/api/auth", authRoutes)
 app.use("/api/messages", messageRoutes)
-app.use("/api/friends/", friendsRoutes)
+app.use("/api/friends", friendsRoutes)
 
 server.listen(PORT, () => {
     console.log("Server is running on port " + PORT);
