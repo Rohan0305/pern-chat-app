@@ -92,7 +92,7 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
           friendId,
         },
       }),
-      
+
       prisma.friendShip.create({
         data: {
           userId: friendId,
@@ -119,3 +119,23 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const getFriendRequests = async (req: Request, res: Response) => {
+  try{
+    const userId = req.user.id;
+
+    const requests = await prisma.friendRequest.findMany({
+      where: {
+        OR: [
+          { senderId: userId },
+          { receiverId: userId }
+        ]
+      }
+    });
+    
+    res.status(200).json(requests);
+  } catch (error: any) {
+    console.error("Error in getFriendRequest:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
