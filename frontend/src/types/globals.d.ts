@@ -15,7 +15,12 @@ type MessageType = {
 type RequestType = {
   id: string;
   createdAt: Date;
-  senderId: string;
   receiverId: string;
   status: $Enums.FriendRequestStatus;
+  sender: {
+    id: string;
+    username: string;
+    fullName: string;
+    profilePic: string;
+  };
 };

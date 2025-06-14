@@ -83,20 +83,16 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
 export const acceptFriendRequest = async (req: Request, res: Response) => {
   try {
     const { id: friendId } = req.params;
+    console.log(friendId);
     const userId = req.user.id;
+    console.log(userId);
+    const [id1, id2] = [userId, friendId].sort();
 
     await prisma.$transaction([
       prisma.friendShip.create({
         data: {
-          userId,
-          friendId,
-        },
-      }),
-
-      prisma.friendShip.create({
-        data: {
-          userId: friendId,
-          friendId: userId,
+          userId: id1,
+          friendId: id2,
         },
       }),
 
@@ -112,7 +108,7 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
         },
       }),
     ]);
-
+    console.log("HERE");
     res.status(200).json({ message: "Friend request accepted." });
   } catch (error: any) {
     console.error("Error in acceptFriendRequest:", error.message);
@@ -121,21 +117,32 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
 };
 
 export const getFriendRequests = async (req: Request, res: Response) => {
-  try{
+  try {
     const userId = req.user.id;
 
     const requests = await prisma.friendRequest.findMany({
       where: {
-        OR: [
-          { senderId: userId },
-          { receiverId: userId }
-        ]
-      }
+        OR: [{ senderId: userId }, { receiverId: userId }],
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            profilePic: true,
+          },
+        },
+        status: true,
+        receiverId: true,
+      },
     });
-    
+
     res.status(200).json(requests);
   } catch (error: any) {
     console.error("Error in getFriendRequest:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};
