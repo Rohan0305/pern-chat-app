@@ -12,7 +12,7 @@ const useGetRequests = () => {
       setRequests([]);
 
       try {
-        const res = await fetch(`/api/friends/getFriendRequests`);
+        const res = await fetch(`/api/friends/getReceivedFriendRequests`);
         const data = await res.json();
         if (!res.ok) {
           throw new Error(data.error || "An error occurred");

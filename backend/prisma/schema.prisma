@@ -44,8 +44,6 @@ model FriendShip {
   friend User @relation("UserFriends", fields: [friendId], references: [id])
 
   createdAt DateTime @default(now())
-
-  @@unique([userId, friendId])
 }
 
 

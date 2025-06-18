@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../db/prisma.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const sendFriendRequest = async (req: Request, res: Response) => {
   try {
@@ -20,14 +21,15 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
       return;
     }
 
-    const friendShip = await prisma.friendShip.findUnique({
+    const friendShip = await prisma.friendShip.findFirst({
       where: {
-        userId_friendId: {
-          userId: senderId,
-          friendId: potentialFriend.id,
-        },
+        OR: [
+          { userId: senderId, friendId: potentialFriend.id },
+          { userId: potentialFriend.id, friendId: senderId }
+        ]
       },
     });
+    
 
     if (friendShip) {
       res.status(400).json({ error: "User is already a friend" });
@@ -71,7 +73,29 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
         senderId,
         receiverId: potentialFriend.id,
       },
+      select: {
+        id: true,
+        createdAt: true,
+        receiverId: true,
+        status: true,
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            profilePic: true,
+          },
+        },
+      },
     });
+    
+    
+    const receiverSocketId = getReceiverSocketId(potentialFriend.id);
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newFriendRequest", newFriendRequest);
+    }
+
     res.status(201).json(newFriendRequest);
   } catch (error: any) {
     console.log("Error in friends controller", error.message);
@@ -83,16 +107,20 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
 export const acceptFriendRequest = async (req: Request, res: Response) => {
   try {
     const { id: friendId } = req.params;
-    console.log(friendId);
     const userId = req.user.id;
-    console.log(userId);
-    const [id1, id2] = [userId, friendId].sort();
 
     await prisma.$transaction([
       prisma.friendShip.create({
         data: {
-          userId: id1,
-          friendId: id2,
+          userId,
+          friendId,
+        },
+      }),
+
+      prisma.friendShip.create({
+        data: {
+          userId: friendId,
+          friendId: userId,
         },
       }),
 
@@ -108,7 +136,7 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
         },
       }),
     ]);
-    console.log("HERE");
+
     res.status(200).json({ message: "Friend request accepted." });
   } catch (error: any) {
     console.error("Error in acceptFriendRequest:", error.message);
@@ -116,13 +144,16 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
   }
 };
 
-export const getFriendRequests = async (req: Request, res: Response) => {
+export const getReceivedFriendRequests = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const userId = req.user.id;
 
     const requests = await prisma.friendRequest.findMany({
       where: {
-        OR: [{ senderId: userId }, { receiverId: userId }],
+        receiverId: userId,
       },
       select: {
         id: true,
@@ -137,6 +168,36 @@ export const getFriendRequests = async (req: Request, res: Response) => {
         },
         status: true,
         receiverId: true,
+      },
+    });
+
+    res.status(200).json(requests);
+  } catch (error: any) {
+    console.error("Error in getFriendRequest:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getSentFriendRequests = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user.id;
+
+    const requests = await prisma.friendRequest.findMany({
+      where: {
+        senderId: userId,
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        receiver: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            profilePic: true,
+          },
+        },
+        status: true,
       },
     });
 
