@@ -1,8 +1,10 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import useConversation from "../zustand/useConversation";
 
 const useAcceptFriendship = () => {
     const [acceptLoading, setLoading] = useState(false);
+    const {conversations, setConversations} = useConversation();
 
     const acceptFriendship = async (senderId: string) => {
         setLoading(true);
@@ -15,7 +17,14 @@ const useAcceptFriendship = () => {
             });
             const data = await res.json();
             if (data.error) throw new Error(data.error);
-            console.log(data)
+            
+            let currentConvos = conversations;
+            if (currentConvos == null || currentConvos.length == 0) {
+                setConversations([data])
+            }
+            currentConvos = [...(conversations ? conversations : []), data];
+            setConversations(currentConvos);
+
         }catch(error: any){
             toast.error(error.message)
         } finally {

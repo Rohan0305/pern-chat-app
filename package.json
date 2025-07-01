@@ -19,6 +19,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.839.0",
     "@prisma/client": "^6.5.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",

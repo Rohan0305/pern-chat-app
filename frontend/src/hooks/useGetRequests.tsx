@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 
 const useGetRequests = () => {
   const [loading, setLoading] = React.useState(false);
-  const { requests, setRequests } = useRequests();
+  const {setRequests } = useRequests();
 
   useEffect(() => {
     const getRequests = async () => {
@@ -28,7 +28,7 @@ const useGetRequests = () => {
 
     getRequests();
   }, [setRequests]);
-  return {loading, requests}
+  return {loading}
 };
 
 export default useGetRequests;

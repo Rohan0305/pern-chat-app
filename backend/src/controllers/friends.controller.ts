@@ -109,21 +109,13 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
     const { id: friendId } = req.params;
     const userId = req.user.id;
 
-    await prisma.$transaction([
+    const [_, __, updatedFriendRequest, newFriend] = await prisma.$transaction([
       prisma.friendShip.create({
-        data: {
-          userId,
-          friendId,
-        },
+        data: { userId, friendId },
       }),
-
       prisma.friendShip.create({
-        data: {
-          userId: friendId,
-          friendId: userId,
-        },
+        data: { userId: friendId, friendId: userId },
       }),
-
       prisma.friendRequest.update({
         where: {
           senderId_receiverId: {
@@ -134,10 +126,37 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
         data: {
           status: "ACCEPTED",
         },
+        select: {
+          id: true,
+          receiver: {
+            select: {
+              fullName: true,
+            }
+          }
+        }
       }),
-    ]);
 
-    res.status(200).json({ message: "Friend request accepted." });
+      prisma.user.findFirst({
+        where: {
+          id: friendId,
+        },
+        select: {
+          id: true,
+          fullName: true,
+          profilePic: true,
+        }
+      })
+    ]);
+  
+    const receiverSocketId = getReceiverSocketId(friendId);
+
+    console.log(receiverSocketId)
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("acceptedFriendship", updatedFriendRequest, newFriend);
+    }
+
+    res.status(200).json(newFriend);
+
   } catch (error: any) {
     console.error("Error in acceptFriendRequest:", error.message);
     res.status(500).json({ error: "Internal Server Error" });

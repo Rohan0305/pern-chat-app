@@ -1,10 +1,12 @@
 import MessageContainer from "../components/messages/MessageContainer";
 import Sidebar from "../components/sidebar/Sidebar";
 import Topbar from "../components/topbar/Topbar";
+import useListenAcceptedFriendShips from "../hooks/useListenAcceptedFriendship";
 import useListenFriendRequests from "../hooks/useListenFriendRequests";
 
 const Home = () => {
   useListenFriendRequests();
+  useListenAcceptedFriendShips();
   
   return (
     <div className="flex flex-col w-full sm:max-w-screen-md mx-auto rounded-lg sm:h-[600px] overflow-hidden bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">

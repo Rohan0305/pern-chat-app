@@ -16,11 +16,11 @@ const useSendFriendRequest = () => {
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+      toast.success("Friend request sent")
     } catch (error: any) {
       toast.error(error.message);
     } finally {
       setLoading(false);
-      toast.success("Friend request sent")
     }
   };
 
