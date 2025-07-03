@@ -8,6 +8,7 @@ const SignUp = () => {
     fullName: "",
     username: "",
     password: "",
+    email: "",
     confirmPassword: "",
     gender: "",
   });
@@ -86,6 +87,21 @@ const SignUp = () => {
               value={inputs.confirmPassword}
               onChange={(e) =>
                 setInputs({ ...inputs, confirmPassword: e.target.value })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="label">
+              <span className="text-base label-text">Email</span>
+            </label>
+            <input
+              type="email"
+              placeholder=""
+              className="w-full input input-bordered h-10"
+              value={inputs.email}
+              onChange={(e) =>
+                setInputs({ ...inputs, email: e.target.value })
               }
             />
           </div>

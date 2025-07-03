@@ -18,6 +18,7 @@ model User{
   username String @unique
   fullName String
   password String
+  email String @default("")
   gender Gender
   profilePic String
   createdAt DateTime @default(now())

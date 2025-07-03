@@ -3,26 +3,9 @@ import prisma from "../db/prisma.js";
 import bcryptjs from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 
-import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
-
-const lambda = new LambdaClient({ region: "us-east-1" });
-
-const sendLoginEmail = async (username: string) => {
-  const command = new InvokeCommand({
-    FunctionName: "sendTestEmail", // Use your actual Lambda function name
-    InvocationType: "RequestResponse",
-    Payload: Buffer.from(JSON.stringify({ username })),
-  });
-
-  const response = await lambda.send(command);
-  const payload = JSON.parse(new TextDecoder("utf-8").decode(response.Payload));
-  return payload;
-};
-
-
 export const signup = async (req: Request, res: Response) => {
   try {
-    const { fullName, username, password, confirmPassword, gender } = req.body;
+    const { fullName, username, password, confirmPassword, gender, email } = req.body;
 
     if (!fullName || !username || !password || !confirmPassword || !gender) {
       res.status(400).json({ error: "Please fill in all fields" });
@@ -53,6 +36,7 @@ export const signup = async (req: Request, res: Response) => {
         username,
         password: hashedPassword,
         gender,
+        email,
         profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
       },
     });
@@ -98,11 +82,11 @@ export const login = async (req: Request, res: Response) => {
 
     generateToken(user.id, res);
 
-    try {
-      await sendLoginEmail(user.username);
-    } catch (lambdaErr) {
-      console.error("Email Lambda error:", lambdaErr);
-    }
+    // try {
+    //   await sendLoginEmail(user.username);
+    // } catch (lambdaErr) {
+    //   console.error("Email Lambda error:", lambdaErr);
+    // }
 
     res.status(200).json({
       id: user.id,
