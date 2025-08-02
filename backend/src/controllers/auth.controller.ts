@@ -2,6 +2,21 @@ import { Request, Response } from "express";
 import prisma from "../db/prisma.js";
 import bcryptjs from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
+
+const lambda = new LambdaClient({ region: "us-east-1" });
+
+const signedUpEmail = async (username: string, email: string) => {
+  const command = new InvokeCommand({
+    FunctionName: "sendSignedUpEmail",
+    InvocationType: "RequestResponse",
+    Payload: Buffer.from(JSON.stringify({ username, email })),
+  });
+
+  const response = await lambda.send(command);
+  const payload = JSON.parse(new TextDecoder("utf-8").decode(response.Payload));
+  return payload;
+};
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -44,6 +59,8 @@ export const signup = async (req: Request, res: Response) => {
     if (newUser) {
       generateToken(newUser.id, res);
 
+      await signedUpEmail(newUser.username, newUser.email);
+
       res.status(201).json({
         id: newUser.id,
         fullName: newUser.fullName,
@@ -81,12 +98,6 @@ export const login = async (req: Request, res: Response) => {
     }
 
     generateToken(user.id, res);
-
-    // try {
-    //   await sendLoginEmail(user.username);
-    // } catch (lambdaErr) {
-    //   console.error("Email Lambda error:", lambdaErr);
-    // }
 
     res.status(200).json({
       id: user.id,

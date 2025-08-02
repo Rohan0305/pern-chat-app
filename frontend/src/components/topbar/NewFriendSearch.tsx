@@ -1,10 +1,11 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { Search, UserPlus } from "lucide-react";
 import useSendFriendRequest from "../../hooks/useSendFriendRequest";
 
 const NewFriendSearch = () => {
 	const [search, setSearch] = useState("");
-	const {sendFriendRequest} = useSendFriendRequest();
+	const { sendFriendRequest, loading } = useSendFriendRequest();
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -14,20 +15,31 @@ const NewFriendSearch = () => {
 		}
 
 		await sendFriendRequest(search);
-
 	};
 
 	return (
-		<form className='flex items-center gap-2' onSubmit={handleSubmit}>
-			<input
-				type='text'
-				placeholder='Search…'
-				className='input-sm md:input input-bordered rounded-full sm:rounded-full w-full'
-				value={search}
-				onChange={(e) => setSearch(e.target.value)}
-			/>
-			<button className="bg-green-400 hover:bg-green-300 h-10 w-24 px-4 py-2 rounded flex text-white text-center text-sm items-center justify-center">Add Friend</button>
+		<form className='flex items-center gap-3' onSubmit={handleSubmit}>
+			<div className="relative flex-1">
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+				<input
+					type='text'
+					placeholder='Search for users...'
+					className='w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-gray-600/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200'
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+					disabled={loading}
+				/>
+			</div>
+			<button 
+				type="submit"
+				disabled={loading || !search.trim()}
+				className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-500 disabled:to-gray-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shadow-lg hover:shadow-xl"
+			>
+				<UserPlus className="w-4 h-4" />
+				{loading ? "Sending..." : "Add Friend"}
+			</button>
 		</form>
 	);
 };
+
 export default NewFriendSearch;

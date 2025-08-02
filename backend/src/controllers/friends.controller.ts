@@ -34,6 +34,19 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
   try {
     const { userName } = req.body;
     const senderId = req.user.id;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: senderId,
+      },
+      select: {
+        username: true,
+      }
+    })
+
+    if (!user) {
+      res.status(400).json({ error: "User does not exist" });
+      return;
+    }
 
     const potentialFriend = await prisma.user.findUnique({
       where: {
@@ -126,7 +139,7 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
 
     try {
       await sentFriendRequestEmail(
-        potentialFriend.username,
+        user.username,
         potentialFriend.email
       );
     } catch (lambdaErr) {
@@ -145,6 +158,20 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
   try {
     const { id: friendId } = req.params;
     const userId = req.user.id;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        username: true,
+      }
+    })
+
+    if (!user) {
+      res.status(400).json({ error: "User does not exist" });
+      return;
+    }
 
     const [_, __, updatedFriendRequest, newFriend] = await prisma.$transaction([
       prisma.friendShip.create({
@@ -200,7 +227,7 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
 
     if (newFriend) {
       try {
-        await acceptedFriendRequestEmail(newFriend.username, newFriend.email);
+        await acceptedFriendRequestEmail(user.username, newFriend.email);
       } catch (lambdaErr) {
         console.error("Email Lambda error:", lambdaErr);
       }
