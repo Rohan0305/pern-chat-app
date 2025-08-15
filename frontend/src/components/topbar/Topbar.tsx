@@ -11,7 +11,7 @@ const Topbar = () => {
       <NewFriendSearch />
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-3 bg-gradient-to-r from-blue-500/20 to-indigo-600/20 hover:from-blue-500/30 hover:to-indigo-600/30 border border-blue-500/30 hover:border-blue-500/50 rounded-xl transition-all duration-200 group"
+        className="relative p-3 bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-500/30 rounded-xl group shadow-lg"
       >
         <Inbox className="w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors duration-200" />
         <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>

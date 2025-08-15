@@ -240,6 +240,27 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
   }
 };
 
+export const ignoreRequest = async (req: Request, res: Response) => {
+  try{
+    const {id: requestId} = req.params;
+
+    const request = await prisma.friendRequest.delete({
+      where: {
+        id: requestId,
+      },
+    });
+
+    if (!request) {
+      res.status(400).json({ error: "Request does not exist" });
+      return;
+    }
+
+  } catch (error: any) {
+    console.error("Error in ignoreRequest:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
 export const getReceivedFriendRequests = async (
   req: Request,
   res: Response

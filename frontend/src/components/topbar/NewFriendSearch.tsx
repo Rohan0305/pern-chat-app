@@ -33,7 +33,7 @@ const NewFriendSearch = () => {
 			<button 
 				type="submit"
 				disabled={loading || !search.trim()}
-				className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-500 disabled:to-gray-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shadow-lg hover:shadow-xl"
+				className="bg-gradient-to-r from-green-500 to-emerald-600 disabled:from-gray-500 disabled:to-gray-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 shadow-lg"
 			>
 				<UserPlus className="w-4 h-4" />
 				{loading ? "Sending..." : "Add Friend"}

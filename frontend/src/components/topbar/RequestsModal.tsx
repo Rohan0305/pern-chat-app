@@ -3,6 +3,7 @@ import { useAuthContext } from "../../context/AuthContext";
 import useAcceptFriendship from "../../hooks/useAcceptFriendship";
 import useGetRequests from "../../hooks/useGetRequests";
 import useRequests from "../../zustand/useRequests";
+import useIgnoreRequest from "../../hooks/useIgnoreRequest";
 
 export const Modal = ({
   isOpen,
@@ -13,22 +14,23 @@ export const Modal = ({
 }) => {
   if (!isOpen) return null;
 
-  const { loading } = useGetRequests();
+  useGetRequests();
   const {requests, setRequests} = useRequests();
   const { authUser } = useAuthContext();
   const [removeRequestId, setRemoveRequestId] = useState<string | null>(null);
   const { acceptLoading, acceptFriendship } = useAcceptFriendship();
+  const { ignoreLoading, ignoreRequest } = useIgnoreRequest();
 
   useEffect(() => {
-    if (acceptLoading && removeRequestId) {
+    if ((acceptLoading || ignoreLoading) && removeRequestId) {
       let currentRequests = requests ?? [];
       currentRequests = requests?.filter((request) => request.id !== removeRequestId) ?? [];
       setRequests(currentRequests)
     }
-  }, [acceptLoading, removeRequestId]);
+  }, [acceptLoading, ignoreLoading, removeRequestId]);
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center z-50">
+    <div className="fixed left-1/2 top-[300%] -translate-x-1/2 flex w-128 justify-center items-start">
       <div className="bg-white min-h-[200px] max-h-[80vh] w-full max-w-lg overflow-y-auto p-6 rounded-lg shadow-lg relative">
         <p className="text-black text-center mb-2 font-bold">Friend Requests</p>
         <button
@@ -73,7 +75,10 @@ export const Modal = ({
                     Confirm
                   </button>
                   <button
-                    onClick={() => console.log("here")}
+                    onClick={async () => {
+                      setRemoveRequestId(request.id);
+                      await ignoreRequest(request.id);
+                    }}
                     className="bg-red-400 hover:bg-red-300 h-10 w-18 px-4 py-2 rounded flex text-white text-center text-sm items-center justify-center"
                   >
                     Ignore

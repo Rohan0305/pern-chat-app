@@ -1,13 +1,12 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
 import useConversation from "../../zustand/useConversation";
-import useGetConversations from "../../hooks/useGetConversations";
 import toast from "react-hot-toast";
 
 const SearchInput = () => {
 	const [search, setSearch] = useState("");
 	const { setSelectedConversation } = useConversation();
-	const { conversations } = useGetConversations();
+	const { conversations } = useConversation();
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -16,7 +15,7 @@ const SearchInput = () => {
 			return toast.error("Search term must be at least 3 characters long")
 		}
 
-		const conversation = conversations.find((c: ConversationType) => {
+		const conversation = conversations?.find((c: ConversationType) => {
 			return c.fullName.toLowerCase().includes(search.toLowerCase());
 		});
 
@@ -40,7 +39,7 @@ const SearchInput = () => {
 			</div>
 			<button 
 				type='submit' 
-				className='bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white p-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl'
+				className='bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl shadow-lg' 
 			>
 				<Search className='w-4 h-4' />
 			</button>
