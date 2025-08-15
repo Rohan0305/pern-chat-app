@@ -1,0 +1,122 @@
+import prisma from "../db/prisma.js";
+import bcryptjs from "bcryptjs";
+import generateToken from "../utils/generateToken.js";
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
+const lambda = new LambdaClient({ region: "us-east-1" });
+const signedUpEmail = async (username, email) => {
+    const command = new InvokeCommand({
+        FunctionName: "sendSignedUpEmail",
+        InvocationType: "RequestResponse",
+        Payload: Buffer.from(JSON.stringify({ username, email })),
+    });
+    const response = await lambda.send(command);
+    const payload = JSON.parse(new TextDecoder("utf-8").decode(response.Payload));
+    return payload;
+};
+export const signup = async (req, res) => {
+    try {
+        const { fullName, username, password, confirmPassword, gender, email } = req.body;
+        if (!fullName || !username || !password || !confirmPassword || !gender) {
+            res.status(400).json({ error: "Please fill in all fields" });
+            return;
+        }
+        if (password != confirmPassword) {
+            res.status(400).json({ error: "Passwords don't match" });
+            return;
+        }
+        const user = await prisma.user.findUnique({ where: { username } });
+        if (user) {
+            res.status(400).json({ error: "Username already exists" });
+            return;
+        }
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(password, salt);
+        const boyProfilePic = `https://ui-avatars.com/api/?name=${username}&background=random`;
+        const girlProfilePic = `https://ui-avatars.com/api/?name=${username}&background=random`;
+        const newUser = await prisma.user.create({
+            data: {
+                fullName,
+                username,
+                password: hashedPassword,
+                gender,
+                email,
+                profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
+            },
+        });
+        if (newUser) {
+            generateToken(newUser.id, res);
+            await signedUpEmail(newUser.username, newUser.email);
+            res.status(201).json({
+                id: newUser.id,
+                fullName: newUser.fullName,
+                username: newUser.username,
+                profilePic: newUser.profilePic,
+            });
+            return;
+        }
+        else {
+            res.status(400).json({ error: "Invalid user data" });
+            return;
+        }
+    }
+    catch (error) {
+        console.log("Error in signup controller", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+    }
+};
+export const login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = await prisma.user.findUnique({ where: { username } });
+        if (!user) {
+            res.status(400).json({ error: "Invalid credentials" });
+            return;
+        }
+        const isPasswordCorrect = await bcryptjs.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            res.status(400).json({ error: "Invalid credentials" });
+            return;
+        }
+        generateToken(user.id, res);
+        res.status(200).json({
+            id: user.id,
+            fullName: user.fullName,
+            username: user.username,
+            profilePic: user.profilePic,
+        });
+    }
+    catch (error) {
+        console.log("Error in signup controller", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+export const logout = async (req, res) => {
+    try {
+        res.cookie("jwt", "", { maxAge: 0 });
+        res.status(200).json({ message: "Logged out successfully" });
+    }
+    catch (error) {
+        console.log("Error in logout controller", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+export const getMe = async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+        if (!user) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+        res.status(200).json({
+            id: user.id,
+            fullName: user.fullName,
+            username: user.username,
+            profilePic: user.profilePic,
+        });
+    }
+    catch (error) {
+        console.log("Error in getMe controller", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
