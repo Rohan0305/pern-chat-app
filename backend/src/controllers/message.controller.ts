@@ -105,7 +105,7 @@ export const getUsersForSidebar = async (req: Request, res: Response)=> {
       }
     });
 
-    const friendIds = friendShips.map((f) => f.friendId);
+    const friendIds = friendShips.map((f: { friendId: string }) => f.friendId);
 
     const users = await prisma.user.findMany({
       where: {
