@@ -19,6 +19,7 @@ const useAcceptFriendship = () => {
             if (data.error) throw new Error(data.error);
             
             let currentConvos = conversations;
+    
             if (currentConvos == null || currentConvos.length == 0) {
                 setConversations([data])
             }
